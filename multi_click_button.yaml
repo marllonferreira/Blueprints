@@ -2,7 +2,7 @@ blueprint:
   name: Multi Click Button
   author: AntonH
   description: |
-    **Version 1.0**
+    **Version 1.1**
     Allows multi-click actions to take place on a button.
     Upon reaching the number of required clicks, it executes user defined actions.
 
@@ -89,11 +89,6 @@ action:
   #count clicks
   - repeat:
       sequence:
-        - service: system_log.write
-          data:
-            level: debug
-            message: '{{ time_split[3] | string }}'
-            logger: homeassistant.log
         - wait_for_trigger:
             - platform: state
               entity_id: !input button_entity
