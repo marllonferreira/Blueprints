@@ -1,0 +1,112 @@
+blueprint:
+  name: Multi Click Button
+  author: AntonH
+  description: |
+    Version 1.0
+    Allows multi-click actions to take place on a button.
+    Upon reaching the number of required clicks, it executes user defined actions.
+
+    There are 3 entity types supported:
+      - button
+      - input_button
+      - switch
+    
+    Every states change is counted as a click. Therefore, in switch entity types, both turning it on or off is counted as a 'click'.
+
+  source_url: https://gist.github.com/Twanne/22665059e10dd63a737d56dacb66e7ec
+  domain: automation
+  input:
+    #Select the button
+    button_entity:
+      name: Button entity
+      description: |
+        The button you want to use.
+        Supported entity types:
+          - button
+          - input_button
+          - switch
+      default: []
+      selector:
+        entity:
+          domain:
+            - button
+            - input_button
+            - switch
+    #Number of clicks
+    number_of_clicks:
+      name: How many clicks?
+      description: How many clicks before the action is executed.
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: clicks
+          mode: slider
+    #Maximum allowed time between clicks
+    time_between_clicks:
+      name: Time between clicks
+      description: |
+        How much time can be allowed between any 2 clicks?
+
+        Please fill out the duration in the following format: HH:MM:SS:FFF 
+        H = hours, M = minutes, S = seconds and F is milliseconds 
+      default: []
+      selector:
+        text:
+    #Action conditions
+    action_conditions:
+      name: Action condition
+      description: These conditions need to be met before the required actions are executed.
+      default: []
+      selector:
+        condition:
+    #Actions to execute
+    actions:
+      name: Actions
+      description: Which actions to execute when the button has been pressed the set number of times.
+      default: []
+      selector:
+        action:
+
+#Mode
+mode: single
+
+#Variables
+variables:
+  number_of_clicks: !input number_of_clicks
+  time_between_clicks: !input time_between_clicks
+  time_split: '{{ time_between_clicks.split(":") }}'
+
+#Trigger
+trigger:
+  - platform: state
+    entity_id: !input button_entity
+
+#Action
+action:
+  #count clicks
+  - repeat:
+      sequence:
+        - service: system_log.write
+          data:
+            level: debug
+            message: '{{ time_split[3] | string }}'
+            logger: homeassistant.log
+        - wait_for_trigger:
+            - platform: state
+              entity_id: !input button_entity
+              to: null
+          timeout: 
+            hours: '{{ time_split[0] | int }}'
+            minutes: '{{ time_split[1] | int }}'
+            seconds: '{{ time_split[2] | int }}'
+            milliseconds: '{{ time_split[3] | int }}'
+          continue_on_timeout: false
+      count: '{{ (number_of_clicks | int ) - 1 }}'
+  
+  #execute actions
+  - choose:
+      - conditions: !input action_conditions
+        sequence: !input actions
