@@ -11,7 +11,7 @@ blueprint:
       - input_button
       - switch
     
-    Every states change is counted as a click. Therefore, in switch entity types, both turning it on or off is counted as a 'click'.
+    Every state change is counted as a click. Therefore, in switch entity types, both turning it on or off is counted as a 'click'.
 
   source_url: https://gist.github.com/Twanne/c928236ab8fc98f34151d5e097f78890
   domain: automation
