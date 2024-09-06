@@ -2,7 +2,7 @@ blueprint:
   name: Multi Click Button
   author: AntonH
   description: |
-    **Version 1.1**
+    **Version 1.2**
     Allows multi-click actions to take place on a button.
     Upon reaching the number of required clicks, it executes user defined actions.
 
@@ -21,7 +21,8 @@ blueprint:
       name: Button entity
       description: |
         The button you want to use.
-        Supported entity types:
+
+        **Supported entity types:**
           - button
           - input_button
           - switch
@@ -47,18 +48,15 @@ blueprint:
     #Maximum allowed time between clicks
     time_between_clicks:
       name: Time between clicks
-      description: |
-        How much time can be allowed between any 2 clicks?
-
-        Please fill out the duration in the following format: HH:MM:SS:FFF 
-        H = hours, M = minutes, S = seconds and F is milliseconds 
+      description: How much time is allowed between any 2 clicks?
       default: []
       selector:
-        text:
+        duration:
+          enable_millisecond: true
     #Action conditions
     action_conditions:
       name: Action condition
-      description: These conditions need to be met before the required actions are executed.
+      description: These conditions need to be met before the actions are executed.
       default: []
       selector:
         condition:
@@ -77,7 +75,6 @@ mode: single
 variables:
   number_of_clicks: !input number_of_clicks
   time_between_clicks: !input time_between_clicks
-  time_split: '{{ time_between_clicks.split(":") }}'
 
 #Trigger
 trigger:
@@ -93,11 +90,7 @@ action:
             - platform: state
               entity_id: !input button_entity
               to: null
-          timeout: 
-            hours: '{{ time_split[0] | int }}'
-            minutes: '{{ time_split[1] | int }}'
-            seconds: '{{ time_split[2] | int }}'
-            milliseconds: '{{ time_split[3] | int }}'
+          timeout: '{{ time_between_clicks }}'
           continue_on_timeout: false
       count: '{{ (number_of_clicks | int ) - 1 }}'
   
