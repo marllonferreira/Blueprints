@@ -39,10 +39,14 @@ necessário. Em cada caixa d'água, há um sensor que mede a profundidade da ág
 
 ### instalação
 
-fsf
-sdfasdfasdfasdfasdasdfasdfa
-sdfa
-sdf
-asdfasd
+O projeto faz a medição da caixa d'água inferior (subsolo) e da caixa superior
+(cobertura). Há 03 LEDs para cada caixa que indicam os volumes de água: 80%, 50%
+e 30%. O circuito principal fica localizado na casa das bombas, montado em uma
+caixa de projeto eletrônico, e possui 06 LEDs (03 para a caixa inferior e 03 para
+a caixa superior). Uma outra caixa, localizada na portaria do prédio, possui 06
+LEDs que indicam as mesmas condições e também um buzzer, que emite sons
+diferentes para situações diferentes. Essa caixa da portaria também possui um
+push button, utilizado para reiniciar remotamente o Arduino, caso seja
+necessário. Em cada caixa d'água, há um sensor que mede a profundidade da água.
 
 
