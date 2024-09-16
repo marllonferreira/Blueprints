@@ -22,7 +22,7 @@ Clique em “Importar Blueprint”
 
 ## Sumário
 
-- [Botão Multi Clique](#Botão Multi Clique)
+- [Botão Multi Clique](#Botão_Multi_Clique)
 - [Instalação](#instalação)
 
 
@@ -41,7 +41,7 @@ Eu vou manter esse projeto em português para o caso de outra pessoa necessitar
 fazer manutenção no sistema do meu prédio (assim eu poderei viajar e até mesmo
 me mudar).
 
-### Botão Multi Clique
+### Botão_Multi_Clique
 
 O projeto faz a medição da caixa d'água inferior (subsolo) e da caixa superior
 (cobertura). Há 03 LEDs para cada caixa que indicam os volumes de água: 80%, 50%
