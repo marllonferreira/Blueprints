@@ -1,19 +1,19 @@
 blueprint:
-  name: Multi Click Button
+  name: Botão Multiclique
   author: AntonH
   description: |
-    **Version 1.2**
-    Allows multi-click actions to take place on a button.
-    Upon reaching the number of required clicks, it executes user defined actions.
+    **Version 1.2** **traduzido por Marllon Ferrreira**
+    Permite que ações de vários cliques ocorram em um botão.
+    Ao atingir o número de cliques necessários, ele executa ações definidas pelo usuário.
 
-    There are 3 entity types supported:
+    Existem 3 tipos de entidade suportados:
       - button
       - input_button
       - switch
     
-    **NOTE:** *Every state change is counted as a click. Therefore, in switch entity types, both turning it on or off is counted as a 'click'.*
+    **OBSERVAÇÃO:** *Cada mudança de estado é contada como um clique. Portanto, em tipos de entidade switch, ativá-lo ou desativá-lo é contado como um 'clique'.*
     
-  source_url: https://gist.github.com/Twanne/c928236ab8fc98f34151d5e097f78890
+  source_url: https://gist.github.com/marllonferreira/ad578953c9ff451d6e052597ef651ea2
   domain: automation
   input:
     #Select the button
@@ -35,8 +35,8 @@ blueprint:
             - switch
     #Number of clicks
     number_of_clicks:
-      name: How many clicks?
-      description: How many clicks before the action is executed.
+      name: Quantos cliques?
+      description: Quantos cliques antes da ação ser executada.
       default: 2
       selector:
         number:
@@ -47,23 +47,23 @@ blueprint:
           mode: slider
     #Maximum allowed time between clicks
     time_between_clicks:
-      name: Time between clicks
-      description: How much time is allowed between any 2 clicks?
+      name: Tempo entre cliques
+      description: Quanto tempo é permitido entre 2 cliques?
       default: []
       selector:
         duration:
           enable_millisecond: true
     #Action conditions
     action_conditions:
-      name: Action condition
-      description: These conditions need to be met before the actions are executed.
+      name: Condição de ação
+      description: Essas condições precisam ser atendidas antes que as ações sejam executadas.
       default: []
       selector:
         condition:
     #Actions to execute
     actions:
-      name: Actions
-      description: Which actions to execute when the button has been pressed the set number of times.
+      name: Ações
+      description: Quais ações executar quando o botão for pressionado o número de vezes definido.
       default: []
       selector:
         action:
