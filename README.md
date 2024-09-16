@@ -1,30 +1,14 @@
-# Nivel Caixa D'água com Tasmota
-
- ```
-   npm install
- ```
-
-### construçao de um nivel para caixa d'água usando esp e o tasmota
-<!-- ![Logo](![![image](https://github.com/marllonferreira/Nivel-caixa-dgua-com-tasmota/assets/31580600/bf6bcdd4-c1ed-4542-a802-caffbecef818)
-]()
-) -->
-
-<div align="center">
-  <img src="./doc/imagens/01.jpg" width="40%">
-</div> 
+# Blueprints
 
 
 
-hhhhhhhhhhhhhhhhhhh
+### Modelos de Blueprints 
+
 ## Sumário
 
 - [Projeto](#Projeto)
 - [Instalação](#instalação)
-  - [VSCode](#vscode)
-- [Como Utilizar](#como-utilizar)
-  - [Variáveis](#variáveis)
-  - [Constantes](#contantes)
-ooooooooooooooooo
+
 
 
 ## Projeto de Monitoramento de Nível de Caixa D'Água
@@ -53,63 +37,12 @@ diferentes para situações diferentes. Essa caixa da portaria também possui um
 push button, utilizado para reiniciar remotamente o Arduino, caso seja
 necessário. Em cada caixa d'água, há um sensor que mede a profundidade da água.
 
-### Programas utilizados
+### instalação
 
-### Material utilizado
+fsf
+sdfasdfasdfasdfasdasdfasdfa
+sdfa
+sdf
+asdfasd
 
-* 01 Arduino Uno
-* 12 LEDs comuns de 5mm, sendo 04 vermelhos, 04 amarelos e 04 verdes
-* 12 resistores de 330 ohms
-* 02 sensores utlrasônicos de distância à prova d'água
-* 01 buzzer passivo
-* 01 push button normalmente aberto
 
-Eu comprei todo esse material na China e creio que a licença do GitHub não me
-permita listar os links. Para saber onde comprei e o que comprei,
-[clique aqui](http://eriberto.pro.br/files/arduino-caixa-agua/).
-
-### Material secundário
-
-Há uma lista de material que você deverá querer para montar o projeto, como canos
-e alicate. Eu optei por não usar solda, então, comprei fios individuais com
-conectores Dupont, removi os conectores metálicos das capas com uma agulha (é só
-levantar uma travinha plástica) e os reintroduzi em novas capas que unificam
-vários conectores (machos ou fêmeas). Então, tive que comprar todo esse material.
-Essa manobra evitou a compra de um alicate de crimpar caro.
-
-Você pode improvisar algumas coisas. Muito do que está aqui vem do meu
-perfeccionismo.
-
-* Canos e curvas de PVC para instalar o sensor dentro da caixa d'água
-* Alicate de decapar para fios 26, 28 e 30 AWG
-* Kit de conectores Dupont
-* Fios com conectores metálicos Dupont macho e fêmea
-* Cabo de alarme de 10 vias (para interligar a caixa da portaria)
-* Caixas para projetos de eletrônica
-* Caixas herméticas de passagem para abrigar os circuitos dos sensores
-* Acabamento para os LEDs
-* Isolamento termo retrátil
-
-### Considerações importantes e dicas
-
-* O sensor de distância não permite o aumento do tamanho do fio. Se você tentar
-fazer isso, a leitura apresentará falhas e dará resultados totalmente fora da
-realidade. Assim sendo, coloque a placa de circuito do sensor dentro de uma caixa
-hemética e utilize um fio para levar os quatro terminais dessa placa até o
-Arduino.
-
-* O código fonte utilizado gera saída serial para a tela do notebook (monitor
-serial), relatando as profundidades obtidas pela leitura. Utilize esses dados
-para inserir as profundidades corretas no início do código, após realizar
-medições.
-
-### Desenhos, esquemas e fotos
-
-### Dúvidas e perguntas
-
-### Licença de uso e modificação
-
-Copyright 2021 João Eriberto Mota Filho
-
-Este projeto é regido pela licença MIT e mantido em
-https://github.com/eribertomota/arduino-caixa-dagua.git
