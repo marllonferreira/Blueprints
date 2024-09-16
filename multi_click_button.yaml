@@ -13,7 +13,7 @@ blueprint:
     
     **OBSERVAÇÃO:** *Cada mudança de estado é contada como um clique. Portanto, em tipos de entidade switch, ativá-lo ou desativá-lo é contado como um 'clique'.*
     
-  source_url: https://gist.github.com/marllonferreira/ad578953c9ff451d6e052597ef651ea2
+  source_url: https://github.com/marllonferreira/Blueprints/blob/main/multi_click_button.yaml
   domain: automation
   input:
     #Select the button
