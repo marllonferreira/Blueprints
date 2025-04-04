@@ -1,0 +1,100 @@
+blueprint:
+  name: Botão Multiclique
+  author: AntonH
+  description: |
+    **Version 1.2** **traduzido por Marllon Ferrreira**
+    Permite que ações de vários cliques ocorram em um botão.
+    Ao atingir o número de cliques necessários, ele executa ações definidas pelo usuário.
+
+    Existem 3 tipos de entidade suportados:
+      - button
+      - input_button
+      - switch
+    
+    **OBSERVAÇÃO:** *Cada mudança de estado é contada como um clique. Portanto, em tipos de entidade switch, ativá-lo ou desativá-lo é contado como um 'clique'.*
+    
+  source_url: https://github.com/marllonferreira/Blueprints/blob/main/multi_click_button/multi_click_button.yaml
+  domain: automation
+  input:
+    #Select the button
+    button_entity:
+      name: Button entity
+      description: |
+        The button you want to use.
+
+        **Supported entity types:**
+          - button
+          - input_button
+          - switch
+      default: []
+      selector:
+        entity:
+          domain:
+            - button
+            - input_button
+            - switch
+    #Number of clicks
+    number_of_clicks:
+      name: Quantos cliques?
+      description: Quantos cliques antes da ação ser executada.
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: clicks
+          mode: slider
+    #Maximum allowed time between clicks
+    time_between_clicks:
+      name: Tempo entre cliques
+      description: Quanto tempo é permitido entre 2 cliques?
+      default: []
+      selector:
+        duration:
+          enable_millisecond: true
+    #Action conditions
+    action_conditions:
+      name: Condição de ação
+      description: Essas condições precisam ser atendidas antes que as ações sejam executadas.
+      default: []
+      selector:
+        condition:
+    #Actions to execute
+    actions:
+      name: Ações
+      description: Quais ações executar quando o botão for pressionado o número de vezes definido.
+      default: []
+      selector:
+        action:
+
+#Mode
+mode: single
+
+#Variables
+variables:
+  number_of_clicks: !input number_of_clicks
+  time_between_clicks: !input time_between_clicks
+
+#Trigger
+trigger:
+  - platform: state
+    entity_id: !input button_entity
+
+#Action
+action:
+  #count clicks
+  - repeat:
+      sequence:
+        - wait_for_trigger:
+            - platform: state
+              entity_id: !input button_entity
+              to: null
+          timeout: '{{ time_between_clicks }}'
+          continue_on_timeout: false
+      count: '{{ (number_of_clicks | int ) - 1 }}'
+  
+  #execute actions
+  - choose:
+      - conditions: !input action_conditions
+        sequence: !input actions
