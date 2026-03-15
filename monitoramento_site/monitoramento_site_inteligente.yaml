@@ -1,6 +1,6 @@
 blueprint:
   name: "Monitoramento Inteligente de Site (Ping)"
-  description: "Verifica se um site está online em intervalos configuráveis. Realiza retestes antes de notificar falha."
+  description: "Verifica se um site está online e retesta antes de notificar. Escolha o serviço de notificação na lista sem duplicar campos."
   domain: automation
   input:
     site_entity:
@@ -12,18 +12,18 @@ blueprint:
           device_class: connectivity
     check_interval:
       name: "Intervalo de Verificação (Horas)"
-      description: "Frequência em horas para realizar o ping (ex: /6, /12)."
+      description: "Frequência em horas para realizar o ping."
       default: 12
       selector:
         number:
           min: 1
           max: 24
           unit_of_measurement: h
-    notify_action:
-      name: "Dispositivo de Notificação"
-      description: "Clique em 'Chamar Serviço' e escolha seu celular (notify.mobile_app) ou TV (notify.lg_webos)."
+    notify_service:
+      name: "Serviço de Notificação"
+      description: "Selecione o serviço de destino (Celular, TV, etc). Não se preocupe com os campos de texto aqui, use os campos abaixo."
       selector:
-        action: {} # Isso abre o seletor padrão que você conhece, que é o único que enxerga a TV e Celular perfeitamente.
+        service: {} # Isso abre apenas a lista de serviços sem os campos de dados
     alert_title:
       name: "Título do Alerta"
       default: "⚠️ Alerta de Site Offline"
@@ -43,15 +43,15 @@ trigger:
 
 variables:
   input_check_interval: !input check_interval
-  # Capturamos o título e mensagem para injetar na ação escolhida
-  custom_title: !input alert_title
-  custom_message: !input alert_message
+  chosen_service: !input notify_service
 
 actions:
+  # 1. Força atualização
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
 
+  # 2. Lógica de reteste
   - if:
       - condition: state
         entity_id: !input site_entity
@@ -77,14 +77,10 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Aqui está a mágica: ele executa a ação que você escolheu (Celular/TV)
-              # mas injeta os dados de Título e Mensagem que você definiu no Blueprint.
-              - choose: []
-                default: !input notify_action
-              # O código abaixo força a sobreposição dos dados para garantir que use o seu texto
-              - action: !input notify_action
+              # Executa o serviço selecionado com os textos do Blueprint
+              - action: !input notify_service
                 data:
-                  title: "{{ custom_title }}"
-                  message: "{{ custom_message }}"
+                  title: !input alert_title
+                  message: !input alert_message
     else:
       - stop: "Site online."
