@@ -1,6 +1,6 @@
 blueprint:
   name: "Monitoramento Inteligente de Site (Ping)"
-  description: "Verifica se um site está online e retesta antes de notificar. Permite escolher múltiplos dispositivos de notificação de uma vez."
+  description: "Verifica se um site está online e retesta antes de notificar. Digite os serviços de notificação manualmente para evitar campos duplicados."
   domain: automation
   input:
     site_entity:
@@ -20,14 +20,11 @@ blueprint:
           max: 24
           unit_of_measurement: h
     notifiers:
-      name: "Dispositivos de Notificação"
-      description: "Selecione todos os dispositivos que devem receber o alerta (Celular, TV, etc)."
+      name: "Serviços de Notificação"
+      description: "Digite os serviços (ex: notify.mobile_app_celular). Use a opção 'Adicionar item' para colocar vários."
       selector:
-        entity:
-          multiple: true # ISSO permite escolher vários e não abre campos de texto!
-          filter:
-            - domain: notify
-            - integration: mobile_app
+        text:
+          multiple: true # Permite adicionar uma lista de nomes manualmente
     alert_title:
       name: "Título do Alerta"
       default: "⚠️ Alerta de Site Offline"
@@ -46,17 +43,19 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
-  # Pegamos a lista de entidades selecionadas
-  notifiers: !input notifiers
-  alert_title: !input alert_title
-  alert_message: !input alert_message
+  # Captura as entradas do usuário
+  notifiers_list: !input notifiers
+  custom_title: !input alert_title
+  custom_message: !input alert_message
   input_check_interval: !input check_interval
 
 actions:
+  # 1. Força a atualização do Ping
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
 
+  # 2. Lógica de reteste (3 tentativas no total)
   - if:
       - condition: state
         entity_id: !input site_entity
@@ -82,13 +81,13 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Loop para enviar para cada dispositivo selecionado
+              # Loop para enviar para cada serviço que você digitou
               - repeat:
-                  for_each: "{{ notifiers }}"
+                  for_each: "{{ notifiers_list }}"
                   sequence:
                     - action: "{{ repeat.item }}"
                       data:
-                        title: "{{ alert_title }}"
-                        message: "{{ alert_message }}"
+                        title: "{{ custom_title }}"
+                        message: "{{ custom_message }}"
     else:
-      - stop: "Site online."
+      - stop: "Site online. Nenhuma ação necessária."
