@@ -1,19 +1,17 @@
 blueprint:
   name: "Monitoramento Inteligente de Site (Ping)"
-  description: "Verifica se um site está online e realiza retestes. Digite manualmente os serviços de notificação."
+  description: "Monitoramento com reteste. Digite os serviços de notificação manualmente."
   domain: automation
   input:
     site_entity:
       name: "Sensor de Ping"
-      description: "Selecione o binary_sensor do site."
       selector:
         entity:
           domain: binary_sensor
           device_class: connectivity
     check_interval:
       name: "Intervalo de Verificação (Horas)"
-      description: "A cada quantas horas o sistema deve checar o site."
-      default: 12
+      default: 1
       selector:
         number:
           min: 1
@@ -21,7 +19,7 @@ blueprint:
           unit_of_measurement: h
     notifiers:
       name: "Serviços de Notificação"
-      description: "Digite o nome exato do serviço (ex: notify.mobile_app_celular ou notify.lg_webos_smart_tv). Use 'Adicionar item' para múltiplos."
+      description: "Digite o nome exato (ex: notify.mobile_app_celular). Clique em 'Adicionar item' para mais de um."
       default: []
       selector:
         text:
@@ -39,29 +37,26 @@ blueprint:
 
 mode: restart
 
-# Gatilho simplificado para evitar o erro de validação (roda a cada hora e a condição filtra)
+# Gatilho simplificado que o HA aceita sem erro de "malformed"
 trigger:
   - platform: time_pattern
     hours: "/1"
 
 variables:
-  # Transforma os inputs em variáveis
+  # Pegando os inputs
   var_interval: !input check_interval
   var_notifiers: !input notifiers
-  var_title: !input alert_title
-  var_message: !input alert_message
 
-action:
-  # CONDIÇÃO: Só continua se a hora atual for divisível pelo intervalo escolhido
+actions:
+  # Só executa se a hora atual for múltipla do intervalo (ex: se for 1h, roda sempre)
   - condition: template
     value_template: "{{ (now().hour % (var_interval | int)) == 0 }}"
 
-  # 1. Força a atualização do Ping
+  # 1. Primeira verificação
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
 
-  # 2. Lógica de reteste (Se o estado for 'off')
   - if:
       - condition: state
         entity_id: !input site_entity
@@ -87,13 +82,13 @@ action:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Envia para cada serviço digitado manualmente
+              # Envia para cada serviço digitado no campo manual
               - repeat:
                   for_each: "{{ var_notifiers }}"
                   sequence:
                     - action: "{{ repeat.item }}"
                       data:
-                        title: "{{ var_title }}"
-                        message: "{{ var_message }}"
+                        title: !input alert_title
+                        message: !input alert_message
     else:
       - stop: "Site online."
