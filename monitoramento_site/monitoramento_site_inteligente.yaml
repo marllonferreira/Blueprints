@@ -1,40 +1,39 @@
 blueprint:
-  name: Monitoramento Inteligente de Site (Ping)
-  description: >
-    Verifica se um site está online em intervalos configuráveis. 
-    Realiza retestes antes de notificar falha.
+  name: "Monitoramento Inteligente de Site (Ping)"
+  description: "Verifica se um site está online em intervalos configuráveis e realiza retestes antes de notificar falha."
   domain: automation
   input:
     site_entity:
-      name: Sensor de Ping
-      description: Selecione o binary_sensor do site.
+      name: "Sensor de Ping"
+      description: "Selecione o binary_sensor do site."
       selector:
         entity:
           domain: binary_sensor
           device_class: connectivity
     check_interval:
-      name: Intervalo de Verificação (Horas)
-      description: Frequência em horas para realizar o ping.
+      name: "Intervalo de Verificação (Horas)"
+      description: "Frequência em horas para realizar o ping."
       default: 12
       selector:
         number:
           min: 1
           max: 24
           unit_of_measurement: h
-    notify_service:
-      name: Serviço de Notificação
-      description: Selecione o serviço de notificação na lista.
+    notify_target:
+      name: "Dispositivo de Notificação"
+      description: "Selecione o celular ou TV para receber o alerta."
       selector:
-        entity:
-          filter:
-            - domain: notify # Isso força a listagem das entidades de notificação
+        target:
+          entity:
+            - domain: notify
+            - integration: mobile_app
     alert_title:
-      name: Título do Alerta
+      name: "Título do Alerta"
       default: "⚠️ Alerta de Site Offline"
       selector:
         text:
     alert_message:
-      name: Mensagem do Alerta
+      name: "Mensagem do Alerta"
       default: "O site falhou em todas as tentativas e parece estar fora do ar."
       selector:
         text:
@@ -46,12 +45,12 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
-  # Captura os inputs
   input_check_interval: !input check_interval
-  # Transformamos a entidade selecionada em um nome de serviço
-  notify_service_entity: !input notify_service
+  # Captura o alvo selecionado
+  notify_target_var: !input notify_target
 
 actions:
+  # 1. Primeira verificação
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
@@ -61,6 +60,7 @@ actions:
         entity_id: !input site_entity
         state: "off"
     then:
+      # Primeiro Reteste após 2 minutos
       - delay: "00:02:00"
       - action: homeassistant.update_entity
         target:
@@ -71,6 +71,7 @@ actions:
             entity_id: !input site_entity
             state: "off"
         then:
+          # Segundo Reteste após mais 2 minutos
           - delay: "00:02:00"
           - action: homeassistant.update_entity
             target:
@@ -81,8 +82,10 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Chamada do serviço de forma dinâmica
-              - action: "{{ notify_service_entity }}"
+              # Notificação Final
+              # Usamos notify.send_message que é o padrão universal atual
+              - action: notify.send_message
+                target: !input notify_target
                 data:
                   title: !input alert_title
                   message: !input alert_message
