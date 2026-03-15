@@ -1,30 +1,36 @@
 blueprint:
   name: "Monitoramento Inteligente de Site (Ping)"
-  description: "Verifica se um site está online e retesta antes de notificar. Digite manualmente os serviços de notificação para total compatibilidade."
+  description: "Monitoramento com reteste. Suporta seleção de celular e entrada manual para TV/Telegram."
   domain: automation
   input:
     site_entity:
       name: "Sensor de Ping"
-      description: "Selecione o binary_sensor do site."
       selector:
         entity:
           domain: binary_sensor
           device_class: connectivity
     check_interval:
-      name: "Intervalo de Verificação (Horas)"
-      description: "Frequência em horas para realizar o ping."
+      name: "Intervalo (Horas)"
       default: 12
       selector:
         number:
           min: 1
           max: 24
           unit_of_measurement: h
-    notifiers:
-      name: "Serviços de Notificação (Manual)"
-      description: "Digite o nome exato do serviço. Use 'Adicionar item' para múltiplos (ex: notify.mobile_app_celular)."
+    notify_device:
+      name: "Celular (Opcional)"
+      description: "Selecione o seu smartphone na lista."
+      default: ""
+      selector:
+        device:
+          integration: mobile_app
+    notify_manual:
+      name: "Outros Serviços (Opcional)"
+      description: "Digite manualmente (ex: notify.lg_webos_smart_tv). Adicione vários se precisar."
+      default: []
       selector:
         text:
-          multiple: true # Permite o botão de "+" para adicionar vários manualmente
+          multiple: true
     alert_title:
       name: "Título do Alerta"
       default: "⚠️ Alerta de Site Offline"
@@ -43,19 +49,17 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
-  # Transforma os inputs em variáveis para a lógica
-  notifiers_list: !input notifiers
-  custom_title: !input alert_title
-  custom_message: !input alert_message
   input_check_interval: !input check_interval
+  device_id: !input notify_device
+  manual_notifiers: !input notify_manual
+  title: !input alert_title
+  message: !input alert_message
 
 actions:
-  # 1. Força a atualização do Ping
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
 
-  # 2. Lógica de reteste
   - if:
       - condition: state
         entity_id: !input site_entity
@@ -81,13 +85,22 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Loop que percorre a lista de nomes que você digitou
+              # 1. Envia para o Celular (se selecionado)
+              - if:
+                  - "{{ device_id != '' }}"
+                then:
+                  - action: notify.mobile_app_{{ device_attr(device_id, 'name') | slugify }}
+                    data:
+                      title: "{{ title }}"
+                      message: "{{ message }}"
+              
+              # 2. Envia para os manuais (se houver algum)
               - repeat:
-                  for_each: "{{ notifiers_list }}"
+                  for_each: "{{ manual_notifiers }}"
                   sequence:
                     - action: "{{ repeat.item }}"
                       data:
-                        title: "{{ custom_title }}"
-                        message: "{{ custom_message }}"
+                        title: "{{ title }}"
+                        message: "{{ message }}"
     else:
       - stop: "Site online."
