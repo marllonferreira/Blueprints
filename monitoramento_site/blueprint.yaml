@@ -1,0 +1,94 @@
+blueprint:
+  name: Monitoramento Inteligente de Site (Ping)
+  description: >
+    Verifica se um site está online em intervalos configuráveis (ex: 6h, 12h). 
+    Caso o site falhe, ele realiza até 2 retestes automáticos com intervalo de 2 minutos 
+    entre eles antes de enviar uma notificação definitiva. Isso evita alertas falsos 
+    por oscilações momentâneas de conexão.
+  domain: automation
+  input:
+    site_entity:
+      name: Sensor de Ping
+      description: Selecione a entidade binary_sensor do site (criada via integração Ping).
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: connectivity
+    check_interval:
+      name: Intervalo de Verificação (Horas)
+      description: Frequência em horas para realizar o ping.
+      default: 12
+      selector:
+        number:
+          min: 1
+          max: 24
+          unit_of_measurement: h
+    notification_service:
+      name: Serviço de Notificação
+      description: O serviço de notificação para onde o alerta será enviado (ex. notify.mobile_app_seu_celular).
+      selector:
+        action:
+    alert_title:
+      name: Título do Alerta
+      default: "⚠️ Alerta de Site Offline"
+      selector:
+        text:
+    alert_message:
+      name: Mensagem do Alerta
+      default: "O site falhou em todas as tentativas e parece estar fora do ar."
+      selector:
+        text:
+
+mode: restart
+
+trigger:
+  - platform: time_pattern
+    hours: "/{{ input_check_interval }}"
+
+variables:
+  # Captura o valor do input para ser usado no template do gatilho
+  input_check_interval: !input check_interval
+  site_entity_var: !input site_entity
+
+actions:
+  # 1. Primeira verificação: Força a atualização da entidade
+  - action: homeassistant.update_entity
+    target:
+      entity_id: !input site_entity
+
+  # 2. Inicia a lógica de checagem de estado
+  - if:
+      - condition: state
+        entity_id: !input site_entity
+        state: "off"
+    then:
+      # Primeiro Reteste após 2 minutos
+      - delay: "00:02:00"
+      - action: homeassistant.update_entity
+        target:
+          entity_id: !input site_entity
+      
+      - if:
+          - condition: state
+            entity_id: !input site_entity
+            state: "off"
+        then:
+          # Segundo Reteste após mais 2 minutos
+          - delay: "00:02:00"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: !input site_entity
+          
+          - if:
+              - condition: state
+                entity_id: !input site_entity
+                state: "off"
+            then:
+              # Notificação definitiva após 3 falhas
+              - action: !input notification_service
+                data:
+                  title: !input alert_title
+                  message: !input alert_message
+    else:
+      # Se o site estiver online, encerra sem notificar
+      - stop: "Site está online. Nenhuma ação necessária."
