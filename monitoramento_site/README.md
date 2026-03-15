@@ -14,6 +14,6 @@ Este Blueprint permite monitorar a disponibilidade de um site ou dispositivo IP 
 ## 🛠️ Instalação
 Clique no botão abaixo para importar este Blueprint para sua instância do Home Assistant:
 
-[![Importar Blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://github.com/marllonferreira/Blueprints/blob/main/monitoramento_site_inteligente/monitoramento_site_inteligente.yaml)
+[![Importar Blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://github.com/marllonferreira/Blueprints/blob/main/monitoramento_site/monitoramento_site_inteligente.yaml)
 ---
 *Nota: Certifique-se de que o caminho no link acima (`monitoramento_site/blueprint.yaml`) corresponde exatamente à estrutura de pastas que você criar no seu GitHub.*
