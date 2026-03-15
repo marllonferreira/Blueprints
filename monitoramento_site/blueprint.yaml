@@ -23,10 +23,10 @@ blueprint:
           unit_of_measurement: h
     notify_service:
       name: Serviço de Notificação
-      description: "Exemplo: notify.mobile_app_seu_celular"
+      description: Selecione o serviço de notificação (ex: notify.mobile_app_seu_celular).
       selector:
-        text: # Mudamos para texto simples ou seletor de serviço para evitar a caixa de mensagem duplicada
-          multiline: false
+        service:
+          domain: notify # Isso filtra para mostrar apenas serviços de notificação
     alert_title:
       name: Título do Alerta
       default: "⚠️ Alerta de Site Offline"
@@ -45,11 +45,12 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
+  # Captura os inputs para uso nas ações
   input_check_interval: !input check_interval
-  # Transformamos o input em variável para usar no service call
   service_target: !input notify_service
 
 actions:
+  # 1. Primeira verificação
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
@@ -59,6 +60,7 @@ actions:
         entity_id: !input site_entity
         state: "off"
     then:
+      # Primeiro Reteste
       - delay: "00:02:00"
       - action: homeassistant.update_entity
         target:
@@ -69,6 +71,7 @@ actions:
             entity_id: !input site_entity
             state: "off"
         then:
+          # Segundo Reteste
           - delay: "00:02:00"
           - action: homeassistant.update_entity
             target:
@@ -79,8 +82,8 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Aqui usamos a variável do serviço com os dados fixos abaixo
-              - action: "{{ service_target }}"
+              # Notificação Final usando o serviço selecionado
+              - action: !input notify_service
                 data:
                   title: !input alert_title
                   message: !input alert_message
