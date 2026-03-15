@@ -2,7 +2,7 @@ blueprint:
   name: Monitoramento Inteligente de Site (Ping)
   description: >
     Verifica se um site está online em intervalos configuráveis. 
-    Realiza retestes antes de notificar falha para evitar alarmes falsos.
+    Realiza retestes antes de notificar falha.
   domain: automation
   input:
     site_entity:
@@ -23,10 +23,11 @@ blueprint:
           unit_of_measurement: h
     notify_service:
       name: Serviço de Notificação
-      description: Selecione o serviço de notificação (ex: notify.mobile_app_seu_celular).
+      description: Selecione o serviço de notificação na lista.
       selector:
-        service:
-          domain: notify # Isso filtra para mostrar apenas serviços de notificação
+        entity:
+          filter:
+            - domain: notify # Isso força a listagem das entidades de notificação
     alert_title:
       name: Título do Alerta
       default: "⚠️ Alerta de Site Offline"
@@ -45,12 +46,12 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
-  # Captura os inputs para uso nas ações
+  # Captura os inputs
   input_check_interval: !input check_interval
-  service_target: !input notify_service
+  # Transformamos a entidade selecionada em um nome de serviço
+  notify_service_entity: !input notify_service
 
 actions:
-  # 1. Primeira verificação
   - action: homeassistant.update_entity
     target:
       entity_id: !input site_entity
@@ -60,7 +61,6 @@ actions:
         entity_id: !input site_entity
         state: "off"
     then:
-      # Primeiro Reteste
       - delay: "00:02:00"
       - action: homeassistant.update_entity
         target:
@@ -71,7 +71,6 @@ actions:
             entity_id: !input site_entity
             state: "off"
         then:
-          # Segundo Reteste
           - delay: "00:02:00"
           - action: homeassistant.update_entity
             target:
@@ -82,8 +81,8 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Notificação Final usando o serviço selecionado
-              - action: !input notify_service
+              # Chamada do serviço de forma dinâmica
+              - action: "{{ notify_service_entity }}"
                 data:
                   title: !input alert_title
                   message: !input alert_message
