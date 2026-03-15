@@ -1,6 +1,6 @@
 blueprint:
   name: "Monitoramento Inteligente de Site (Ping)"
-  description: "Verifica se um site está online e retesta antes de notificar. Digite os serviços de notificação manualmente para evitar campos duplicados."
+  description: "Verifica se um site está online e retesta antes de notificar. Digite manualmente os serviços de notificação para total compatibilidade."
   domain: automation
   input:
     site_entity:
@@ -20,11 +20,11 @@ blueprint:
           max: 24
           unit_of_measurement: h
     notifiers:
-      name: "Serviços de Notificação"
-      description: "Digite os serviços (ex: notify.mobile_app_celular). Use a opção 'Adicionar item' para colocar vários."
+      name: "Serviços de Notificação (Manual)"
+      description: "Digite o nome exato do serviço. Use 'Adicionar item' para múltiplos (ex: notify.mobile_app_celular)."
       selector:
         text:
-          multiple: true # Permite adicionar uma lista de nomes manualmente
+          multiple: true # Permite o botão de "+" para adicionar vários manualmente
     alert_title:
       name: "Título do Alerta"
       default: "⚠️ Alerta de Site Offline"
@@ -43,7 +43,7 @@ trigger:
     hours: "/{{ input_check_interval }}"
 
 variables:
-  # Captura as entradas do usuário
+  # Transforma os inputs em variáveis para a lógica
   notifiers_list: !input notifiers
   custom_title: !input alert_title
   custom_message: !input alert_message
@@ -55,7 +55,7 @@ actions:
     target:
       entity_id: !input site_entity
 
-  # 2. Lógica de reteste (3 tentativas no total)
+  # 2. Lógica de reteste
   - if:
       - condition: state
         entity_id: !input site_entity
@@ -81,7 +81,7 @@ actions:
                 entity_id: !input site_entity
                 state: "off"
             then:
-              # Loop para enviar para cada serviço que você digitou
+              # Loop que percorre a lista de nomes que você digitou
               - repeat:
                   for_each: "{{ notifiers_list }}"
                   sequence:
@@ -90,4 +90,4 @@ actions:
                         title: "{{ custom_title }}"
                         message: "{{ custom_message }}"
     else:
-      - stop: "Site online. Nenhuma ação necessária."
+      - stop: "Site online."
